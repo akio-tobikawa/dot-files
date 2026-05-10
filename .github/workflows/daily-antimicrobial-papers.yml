@@ -1,0 +1,86 @@
+name: Daily Antimicrobial Papers Selection
+
+# Triggers:
+# 1. schedule: daily at 22:00 UTC (07:00 JST) — fallback if external scheduler fails
+# 2. workflow_dispatch: external webhook trigger (Notion / Google Calendar / Zapier / curl)
+#    via POST https://api.github.com/repos/<owner>/<repo>/actions/workflows/daily-antimicrobial-papers.yml/dispatches
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Trigger reason (free text, logged only)'
+        required: false
+        default: 'manual or external webhook'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-antimicrobial-papers
+  cancel-in-progress: false
+
+jobs:
+  curate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      BRANCH: claude/medical-papers-selection-A0m2x
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Configure MCP servers (PubMed)
+        run: |
+          mkdir -p ~/.claude
+          cat > ~/.claude/mcp-config.json <<'JSON'
+          {
+            "mcpServers": {
+              "pubmed": {
+                "command": "uvx",
+                "args": ["pubmed-mcp-server"]
+              }
+            }
+          }
+          JSON
+
+      - name: Install uv (for uvx)
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Configure git identity
+        run: |
+          git config user.email "claude-bot@users.noreply.github.com"
+          git config user.name "Claude Daily Curator"
+
+      - name: Run Claude Code with daily selection prompt
+        run: |
+          PROMPT=$(cat prompts/daily-antimicrobial-selection.md)
+          claude --print --permission-mode acceptEdits \
+            --mcp-config ~/.claude/mcp-config.json \
+            --allowedTools "Read,Write,Edit,Bash" \
+            "$PROMPT"
+
+      - name: Commit and push if changed
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            git add 抗菌薬.md 既報管理.md
+            git commit -m "Daily antimicrobial papers update ($(date -u +%Y-%m-%d))
+
+          Triggered by: ${{ github.event_name }} (${{ github.event.inputs.reason || 'scheduled' }})"
+            git push origin "$BRANCH"
+          else
+            echo "No changes to commit."
+          fi
