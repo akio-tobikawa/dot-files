@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>抗菌薬投与量リファレンス（疾患・腎機能別）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #181b22;
+    --panel2: #1f232c;
+    --border: #2a2f3a;
+    --text: #e6e9ef;
+    --muted: #9aa3b2;
+    --accent: #6ea8fe;
+    --warn: #f0a020;
+    --danger: #e15050;
+    --ok: #4ade80;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel2: #f1f3f7;
+      --border: #d8dde6;
+      --text: #1a1d24;
+      --muted: #5b6473;
+      --accent: #2156c9;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+    font-size: 14px; line-height: 1.55;
+  }
+  header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    background: var(--panel); position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { margin: 0 0 6px 0; font-size: 18px; }
+  header .sub { color: var(--muted); font-size: 12px; }
+  .tabs {
+    display: flex; gap: 4px; margin-top: 10px;
+  }
+  .tab {
+    padding: 6px 14px; border-radius: 6px 6px 0 0;
+    background: var(--panel2); color: var(--muted);
+    border: 1px solid var(--border); border-bottom: none;
+    cursor: pointer; font-size: 13px;
+  }
+  .tab.active { background: var(--panel); color: var(--text); font-weight: 600; }
+  main { padding: 16px 20px 60px; max-width: 1280px; margin: 0 auto; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    margin-bottom: 14px;
+  }
+  input[type="search"], select {
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; font-size: 13px;
+  }
+  input[type="search"] { min-width: 220px; flex: 1; }
+  .count { color: var(--muted); font-size: 12px; margin-left: auto; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+  }
+  .card h3 {
+    margin: 0 0 6px 0; font-size: 15px;
+    display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+  }
+  .card .meta { color: var(--muted); font-size: 12px; font-weight: normal; }
+  .card .alias { color: var(--muted); font-size: 12px; }
+  .badge {
+    display: inline-block; font-size: 11px; padding: 1px 7px;
+    border-radius: 10px; background: var(--panel2); color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .badge.cls { background: rgba(110,168,254,0.12); color: var(--accent); border-color: rgba(110,168,254,0.3); }
+  table.dose {
+    width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px;
+  }
+  table.dose th, table.dose td {
+    border: 1px solid var(--border); padding: 6px 10px; text-align: left;
+    vertical-align: top;
+  }
+  table.dose th {
+    background: var(--panel2); color: var(--muted); font-weight: 600;
+    white-space: nowrap;
+  }
+  table.dose td.normal { white-space: nowrap; font-weight: 600; }
+  .notes {
+    margin-top: 8px; padding: 8px 10px; background: var(--panel2);
+    border-left: 3px solid var(--accent); border-radius: 4px;
+    font-size: 12.5px; color: var(--text);
+  }
+  .notes.warn { border-left-color: var(--warn); }
+  .source { margin-top: 6px; color: var(--muted); font-size: 11px; }
+  .empiric-list { margin: 6px 0 0; padding-left: 20px; }
+  .empiric-list li { margin-bottom: 4px; }
+  .disclaimer {
+    background: rgba(240,160,32,0.1); border: 1px solid rgba(240,160,32,0.4);
+    color: var(--text); padding: 10px 14px; border-radius: 6px;
+    margin-bottom: 14px; font-size: 12.5px;
+  }
+  .disclaimer strong { color: var(--warn); }
+  details summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+  .hidden { display: none !important; }
+  @media (max-width: 700px) {
+    table.dose { font-size: 12px; }
+    table.dose th, table.dose td { padding: 4px 6px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>抗菌薬投与量リファレンス</h1>
+  <div class="sub">疾患・腎機能別の経験的投与量参考（Sanford Guide 準拠）</div>
+  <div class="tabs">
+    <div class="tab active" data-tab="drug">薬剤から探す</div>
+    <div class="tab" data-tab="disease">疾患から探す</div>
+  </div>
+</header>
+<main>
+  <div class="disclaimer">
+    <strong>⚠ 注意</strong>
+    本データは <em>Sanford Guide to Antimicrobial Therapy</em> を主たる出典とした学習・参照用リファレンスです。
+    実際の処方は最新の Sanford Guide・各薬剤添付文書・施設プロトコル・患者個別要因（体重、肝機能、PK/PD、相互作用、感受性結果等）に基づき判断してください。
+    本ツールの使用に起因する一切の臨床判断・転帰について責任を負いません。
+  </div>
+
+  <!-- 薬剤タブ -->
+  <section id="tab-drug">
+    <div class="controls">
+      <input id="drug-search" type="search" placeholder="薬剤名・略号・系統で検索（例: PIPC, バンコ, カルバペネム）">
+      <select id="drug-class">
+        <option value="">系統すべて</option>
+      </select>
+      <span class="count" id="drug-count"></span>
+    </div>
+    <div id="drug-list"></div>
+  </section>
+
+  <!-- 疾患タブ -->
+  <section id="tab-disease" class="hidden">
+    <div class="controls">
+      <input id="disease-search" type="search" placeholder="疾患名で検索（例: 肺炎, 髄膜炎, FN, 蜂窩織炎）">
+      <select id="disease-cat">
+        <option value="">カテゴリすべて</option>
+      </select>
+      <span class="count" id="disease-count"></span>
+    </div>
+    <div id="disease-list"></div>
+  </section>
+</main>
+
+<script>
+// ======================================================================
+// データ: 薬剤と腎機能別投与量（Sanford Guide ベース）
+// 略号: PCG=ペニシリンG, ABPC=アンピシリン, AMPC=アモキシシリン,
+//       SBT=スルバクタム, CVA=クラブラン酸, PIPC=ピペラシリン, TAZ=タゾバクタム,
+//       CEZ=セファゾリン, CTRX=セフトリアキソン, CTX=セフォタキシム,
+//       CAZ=セフタジジム, CFPM=セフェピム, CMZ=セフメタゾール,
+//       MEPM=メロペネム, IPM/CS=イミペネム/シラスタチン, DRPM=ドリペネム,
+//       AZT=アズトレオナム, GM=ゲンタマイシン, TOB=トブラマイシン, AMK=アミカシン,
+//       LVFX=レボフロキサシン, CPFX=シプロフロキサシン, MFLX=モキシフロキサシン,
+//       AZM=アジスロマイシン, CAM=クラリスロマイシン, MINO=ミノサイクリン, DOXY=ドキシサイクリン,
+//       VCM=バンコマイシン, TEIC=テイコプラニン, DAP=ダプトマイシン, LZD=リネゾリド,
+//       CLDM=クリンダマイシン, ST=ST合剤, MNZ=メトロニダゾール, CL=コリスチン,
+//       FLCZ=フルコナゾール, ITCZ=イトラコナゾール, VRCZ=ボリコナゾール, PSCZ=ポサコナゾール,
+//       MCFG=ミカファンギン, CPFG=カスポファンギン, L-AMB=リポソーマルAMB,
+//       ACV=アシクロビル, VACV=バラシクロビル, GCV=ガンシクロビル, VGCV=バルガンシクロビル,
+//       OST=オセルタミビル
+// 腎機能列: ">50", "30-50", "15-29", "<15", "HD", "CRRT"
+// HD=透析患者、HD日は透析後追加投与を併記
+// ======================================================================
+
+const drugs = [
+  // ── ペニシリン系 ──
+  {
+    name: "ペニシリンG (PCG)",
+    aliases: "penicillin G, ベンジルペニシリン",
+    cls: "ペニシリン",
+    normal: "200-400万U IV q4h (高用量2400万U/日)",
+    renal: {
+      ">50": "100%",
+      "30-50": "75%",
+      "15-29": "50%",
+      "<15": "25-50%",
+      "HD": "通常量の25-50%、HD後追加",
+      "CRRT": "75% (通常量)"
+    },
+    notes: "髄膜炎・心内膜炎は高用量。腎不全で大量投与は神経毒性（痙攣）注意。",
+  },
+  {
+    name: "アンピシリン (ABPC)",
+    aliases: "ampicillin",
+    cls: "ペニシリン",
+    normal: "1-2 g IV q4-6h（髄膜炎 2 g q4h）",
+    renal: {
+      ">50": "q4-6h",
+      "30-50": "q6-8h",
+      "15-29": "q8-12h",
+      "<15": "q12-24h",
+      "HD": "1-2 g q12-24h、HD後投与",
+      "CRRT": "1-2 g q8-12h"
+    },
+    notes: "Listeria・腸球菌の第一選択。Enterococcus faecalis 心内膜炎は CTRX 併用検討。",
+  },
+  {
+    name: "アンピシリン/スルバクタム (ABPC/SBT)",
+    aliases: "ampicillin-sulbactam, ユナシン",
+    cls: "ペニシリン",
+    normal: "1.5-3 g IV q6h",
+    renal: {
+      ">50": "q6h",
+      "30-50": "q8-12h",
+      "15-29": "q12h",
+      "<15": "q24h",
+      "HD": "1.5-3 g q24h、HD後投与",
+      "CRRT": "1.5-3 g q8-12h"
+    },
+    notes: "嫌気性菌・口腔内菌叢カバー。誤嚥性肺炎・腹腔内感染・蜂窩織炎で使用。",
+  },
+  {
+    name: "アモキシシリン (AMPC)",
+    aliases: "amoxicillin, サワシリン",
+    cls: "ペニシリン",
+    normal: "500 mg PO q8h（高用量 1 g q8h）",
+    renal: {
+      ">50": "q8h",
+      "30-50": "q8-12h",
+      "15-29": "q12h",
+      "<15": "q24h",
+      "HD": "250-500 mg q24h、HD後投与",
+      "CRRT": "500 mg q12h"
+    },
+    notes: "急性副鼻腔炎・中耳炎・歯科感染。高用量は肺炎球菌耐性懸念時。",
+  },
+  {
+    name: "アモキシシリン/クラブラン酸 (AMPC/CVA)",
+    aliases: "amoxicillin-clavulanate, オーグメンチン, クラバモックス",
+    cls: "ペニシリン",
+    normal: "875/125 mg PO q12h or 500/125 mg q8h",
+    renal: {
+      ">50": "通常",
+      "30-50": "500/125 q12h",
+      "15-29": "500/125 q12h",
+      "<15": "500/125 q24h",
+      "HD": "500/125 q24h、HD後投与",
+      "CRRT": "500/125 q8-12h"
+    },
+    notes: "成人非合併症副鼻腔炎は AMPC 単剤の方が有害事象少（Savage 2026）。",
+  },
+  {
+    name: "ピペラシリン/タゾバクタム (PIPC/TAZ)",
+    aliases: "piperacillin-tazobactam, タゾピペ, ゾシン",
+    cls: "ペニシリン",
+    normal: "4.5 g IV q6-8h（重症は q6h or 延長投与）",
+    renal: {
+      ">50": "4.5 g q6-8h",
+      "30-50": "3.375 g q6h",
+      "15-29": "2.25 g q6h",
+      "<15": "2.25 g q8h",
+      "HD": "2.25 g q8h + HD後 0.75 g",
+      "CRRT": "3.375 g q6h"
+    },
+    notes: "緑膿菌カバー。延長/持続投与で PK/PD 最適化。VCM 併用で AKI 増加注意。",
+  },
+
+  // ── セフェム系 ──
+  {
+    name: "セファゾリン (CEZ)",
+    aliases: "cefazolin, セファメジン",
+    cls: "セフェム第1世代",
+    normal: "1-2 g IV q8h（重症 2 g q8h）",
+    renal: {
+      ">50": "q8h",
+      "30-50": "q12h",
+      "15-29": "q24h",
+      "<15": "q24-48h",
+      "HD": "1-2 g q24h、HD後投与",
+      "CRRT": "1-2 g q8-12h"
+    },
+    notes: "MSSA 第一選択、周術期予防、SSI 治療。",
+  },
+  {
+    name: "セフトリアキソン (CTRX)",
+    aliases: "ceftriaxone, ロセフィン",
+    cls: "セフェム第3世代",
+    normal: "1-2 g IV q24h（髄膜炎 2 g q12h）",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要（最大 2 g/日）",
+      "HD": "用量調整不要、HD後投与不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "胆汁排泄主体。Ca含有輸液との同時投与禁忌（新生児）。CAP・髄膜炎・腎盂腎炎の主力。",
+  },
+  {
+    name: "セフォタキシム (CTX)",
+    aliases: "cefotaxime, クラフォラン",
+    cls: "セフェム第3世代",
+    normal: "1-2 g IV q6-8h（髄膜炎 2 g q4-6h）",
+    renal: {
+      ">50": "q6-8h",
+      "30-50": "q8-12h",
+      "15-29": "q12-24h",
+      "<15": "q24h",
+      "HD": "1 g q24h、HD後投与",
+      "CRRT": "1-2 g q8-12h"
+    },
+    notes: "新生児・乳児（CTRX 高ビリルビン懸念例）で代替。",
+  },
+  {
+    name: "セフタジジム (CAZ)",
+    aliases: "ceftazidime, モダシン",
+    cls: "セフェム第3世代（抗緑膿菌）",
+    normal: "1-2 g IV q8h（重症 2 g q8h）",
+    renal: {
+      ">50": "q8h",
+      "30-50": "q12h",
+      "15-29": "q24h",
+      "<15": "0.5 g q24h",
+      "HD": "1 g q24h、HD後投与",
+      "CRRT": "1-2 g q12h"
+    },
+    notes: "緑膿菌・FN 経験的治療。グラム陽性カバー弱い。",
+  },
+  {
+    name: "セフェピム (CFPM)",
+    aliases: "cefepime, マキシピーム",
+    cls: "セフェム第4世代",
+    normal: "1-2 g IV q8-12h（重症 2 g q8h）",
+    renal: {
+      ">50": "q8-12h",
+      "30-50": "1-2 g q24h",
+      "15-29": "1 g q24h",
+      "<15": "0.5 g q24h",
+      "HD": "1 g q24h、HD後投与",
+      "CRRT": "1-2 g q12h"
+    },
+    notes: "FN・敗血症・院内肺炎。脳症（特に高齢腎機能低下例）注意、過剰投与で痙攣。",
+  },
+  {
+    name: "セフメタゾール (CMZ)",
+    aliases: "cefmetazole",
+    cls: "セフェム第2世代/セファマイシン",
+    normal: "1-2 g IV q6-8h",
+    renal: {
+      ">50": "q6-8h",
+      "30-50": "q12h",
+      "15-29": "q24h",
+      "<15": "q24-48h",
+      "HD": "1 g q24-48h、HD後投与",
+      "CRRT": "1-2 g q12h"
+    },
+    notes: "ESBL 産生菌（尿路など軽症例）に選択肢、嫌気性菌カバー。",
+  },
+
+  // ── カルバペネム系 ──
+  {
+    name: "メロペネム (MEPM)",
+    aliases: "meropenem, メロペン",
+    cls: "カルバペネム",
+    normal: "1 g IV q8h（髄膜炎 2 g q8h）",
+    renal: {
+      ">50": "q8h",
+      "30-50": "1 g q12h",
+      "15-29": "0.5-1 g q12h",
+      "<15": "0.5 g q24h",
+      "HD": "0.5-1 g q24h、HD後投与",
+      "CRRT": "1 g q8-12h"
+    },
+    notes: "ESBL・複雑性感染・髄膜炎。痙攣リスク IPM より低い。延長投与考慮。",
+  },
+  {
+    name: "イミペネム/シラスタチン (IPM/CS)",
+    aliases: "imipenem-cilastatin, チエナム",
+    cls: "カルバペネム",
+    normal: "0.5 g IV q6h or 1 g q8h",
+    renal: {
+      ">50": "q6-8h",
+      "30-50": "0.5 g q8h",
+      "15-29": "0.5 g q12h",
+      "<15": "0.25-0.5 g q12h",
+      "HD": "0.25-0.5 g q12h、HD後投与",
+      "CRRT": "0.5 g q8h"
+    },
+    notes: "痙攣リスクあり、髄膜炎では避ける。",
+  },
+  {
+    name: "ドリペネム (DRPM)",
+    aliases: "doripenem, フィニバックス",
+    cls: "カルバペネム",
+    normal: "0.25-0.5 g IV q8h",
+    renal: {
+      ">50": "q8h",
+      "30-50": "0.25 g q8h",
+      "15-29": "0.25 g q12h",
+      "<15": "0.25 g q24h",
+      "HD": "0.25 g q24h、HD後投与",
+      "CRRT": "0.5 g q8h"
+    },
+    notes: "国内承認量はメロペネムより低い。VAP では非推奨（FDA 警告歴）。",
+  },
+
+  // ── モノバクタム ──
+  {
+    name: "アズトレオナム (AZT)",
+    aliases: "aztreonam",
+    cls: "モノバクタム",
+    normal: "1-2 g IV q8h（重症 2 g q6-8h）",
+    renal: {
+      ">50": "q8h",
+      "30-50": "q12h",
+      "15-29": "50% q12h",
+      "<15": "25% q12h",
+      "HD": "0.5 g q12h、HD後 12.5% 追加",
+      "CRRT": "1-2 g q12h"
+    },
+    notes: "β-ラクタムアレルギー時のグラム陰性カバー、緑膿菌活性あり。",
+  },
+
+  // ── アミノグリコシド ──
+  {
+    name: "ゲンタマイシン (GM)",
+    aliases: "gentamicin",
+    cls: "アミノグリコシド",
+    normal: "5-7 mg/kg IV q24h（1日1回法）or 2 mg/kg q8h",
+    renal: {
+      ">50": "q24h（1日1回法）",
+      "30-50": "q36h",
+      "15-29": "q48h",
+      "<15": "TDM 必須、間隔延長",
+      "HD": "1-2 mg/kg HD後",
+      "CRRT": "TDM、2-3 mg/kg q24-48h"
+    },
+    notes: "TDM 必須（peak/trough or AUC）。腎毒性・耳毒性。心内膜炎で β-ラクタム併用。",
+  },
+  {
+    name: "トブラマイシン (TOB)",
+    aliases: "tobramycin",
+    cls: "アミノグリコシド",
+    normal: "5-7 mg/kg IV q24h",
+    renal: {
+      ">50": "q24h",
+      "30-50": "q36h",
+      "15-29": "q48h",
+      "<15": "TDM 必須",
+      "HD": "1-2 mg/kg HD後",
+      "CRRT": "TDM"
+    },
+    notes: "緑膿菌に対し GM よりやや優位。TDM 必須。",
+  },
+  {
+    name: "アミカシン (AMK)",
+    aliases: "amikacin",
+    cls: "アミノグリコシド",
+    normal: "15-20 mg/kg IV q24h",
+    renal: {
+      ">50": "q24h",
+      "30-50": "q36h",
+      "15-29": "q48h",
+      "<15": "TDM 必須",
+      "HD": "5-7.5 mg/kg HD後",
+      "CRRT": "TDM、10-15 mg/kg q24-48h"
+    },
+    notes: "MDR グラム陰性菌（含 ESBL/CRE 補助）、抗酸菌。TDM 必須。",
+  },
+
+  // ── キノロン ──
+  {
+    name: "レボフロキサシン (LVFX)",
+    aliases: "levofloxacin, クラビット",
+    cls: "ニューキノロン",
+    normal: "500-750 mg PO/IV q24h",
+    renal: {
+      ">50": "q24h",
+      "30-50": "750 mg q48h or 500 mg q24h",
+      "15-29": "750 mg 初回→q48h",
+      "<15": "750 mg→48時間毎",
+      "HD": "750 mg 初回→48-72時間毎",
+      "CRRT": "750 mg q48h or 500 mg q24h"
+    },
+    notes: "QT 延長・腱障害・大動脈瘤。高齢者で副作用増。",
+  },
+  {
+    name: "シプロフロキサシン (CPFX)",
+    aliases: "ciprofloxacin, シプロキサン",
+    cls: "ニューキノロン",
+    normal: "400 mg IV q8-12h or 500-750 mg PO q12h",
+    renal: {
+      ">50": "通常",
+      "30-50": "通常",
+      "15-29": "PO 250-500 mg q12h / IV 400 mg q12-24h",
+      "<15": "PO 500 mg q24h / IV 400 mg q24h",
+      "HD": "200-400 mg q24h、HD後",
+      "CRRT": "200-400 mg q12-24h"
+    },
+    notes: "緑膿菌カバー強い、肺炎球菌弱い。Mg/Al/Ca/Fe で吸収低下。",
+  },
+  {
+    name: "モキシフロキサシン (MFLX)",
+    aliases: "moxifloxacin, アベロックス",
+    cls: "ニューキノロン",
+    normal: "400 mg PO/IV q24h",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要",
+      "HD": "用量調整不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "腎排泄少なく腎機能調整不要。尿中濃度低く尿路感染には不向き。QT 延長注意。",
+  },
+
+  // ── マクロライド ──
+  {
+    name: "アジスロマイシン (AZM)",
+    aliases: "azithromycin, ジスロマック",
+    cls: "マクロライド",
+    normal: "500 mg PO/IV q24h（CAP は IV 500 mg→PO）",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "慎重投与（データ限定）",
+      "HD": "用量調整不要、HD後不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "CAP の非定型カバー併用、淋菌（耐性増）。QT 延長注意。",
+  },
+  {
+    name: "クラリスロマイシン (CAM)",
+    aliases: "clarithromycin, クラリス",
+    cls: "マクロライド",
+    normal: "200-400 mg PO q12h",
+    renal: {
+      ">50": "通常",
+      "30-50": "通常",
+      "15-29": "50% に減量",
+      "<15": "50% に減量",
+      "HD": "50% に減量、HD後",
+      "CRRT": "50% に減量"
+    },
+    notes: "CYP3A4 阻害強、相互作用多（スタチン・カルバマゼピン等）。",
+  },
+
+  // ── テトラサイクリン ──
+  {
+    name: "ミノサイクリン (MINO)",
+    aliases: "minocycline, ミノマイシン",
+    cls: "テトラサイクリン",
+    normal: "100 mg PO/IV q12h",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要（最大 200 mg/日）",
+      "<15": "用量調整不要（最大 200 mg/日）",
+      "HD": "用量調整不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "MRSA（市中型）、Acinetobacter、リケッチア。前庭症状・色素沈着。",
+  },
+  {
+    name: "ドキシサイクリン (DOXY)",
+    aliases: "doxycycline, ビブラマイシン",
+    cls: "テトラサイクリン",
+    normal: "100 mg PO/IV q12h",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要",
+      "HD": "用量調整不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "リケッチア・レプトスピラ・市中 MRSA SSTI・CAP（非定型）。",
+  },
+
+  // ── グリコペプチド ──
+  {
+    name: "バンコマイシン (VCM)",
+    aliases: "vancomycin, バンコシン",
+    cls: "グリコペプチド",
+    normal: "loading 25-30 mg/kg → 維持 15-20 mg/kg IV q8-12h、AUC/MIC 400-600 目標",
+    renal: {
+      ">50": "15-20 mg/kg q8-12h",
+      "30-50": "15-20 mg/kg q12-24h",
+      "15-29": "15-20 mg/kg q24h",
+      "<15": "loading 後 TDM 主導",
+      "HD": "loading 25 mg/kg → HD後 7.5-10 mg/kg",
+      "CRRT": "loading 25 mg/kg → 10-15 mg/kg q24h or 持続投与"
+    },
+    notes: "AUC/MIC 400-600 目標（trough 単独評価は非推奨）。腎毒性、PIPC/TAZ 併用で AKI↑。",
+  },
+  {
+    name: "テイコプラニン (TEIC)",
+    aliases: "teicoplanin, タゴシッド",
+    cls: "グリコペプチド",
+    normal: "loading 12 mg/kg q12h × 3-5回 → 維持 6-12 mg/kg q24h",
+    renal: {
+      ">50": "通常",
+      "30-50": "維持 q48h",
+      "15-29": "維持 q72h",
+      "<15": "維持 q72-96h",
+      "HD": "維持 q72h",
+      "CRRT": "trough 主導"
+    },
+    notes: "trough 15-30 mg/L（重症・心内膜炎は 20-40）。loading 不十分例多い。",
+  },
+
+  // ── リポペプチド ──
+  {
+    name: "ダプトマイシン (DAP)",
+    aliases: "daptomycin, キュビシン",
+    cls: "リポペプチド",
+    normal: "6-10 mg/kg IV q24h（菌血症 8-10 mg/kg）",
+    renal: {
+      ">50": "q24h",
+      "30-50": "q24h",
+      "15-29": "q48h",
+      "<15": "q48h",
+      "HD": "q48h、HD日は HD後",
+      "CRRT": "8 mg/kg q48h（CVVH/CVVHDF 強度で q24h）"
+    },
+    notes: "肺炎には無効（サーファクタント不活化）。CK 確認週1。MRSA 菌血症・右心心内膜炎。",
+  },
+
+  // ── オキサゾリジノン ──
+  {
+    name: "リネゾリド (LZD)",
+    aliases: "linezolid, ザイボックス",
+    cls: "オキサゾリジノン",
+    normal: "600 mg PO/IV q12h",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要（代謝物蓄積）",
+      "HD": "用量調整不要、HD後",
+      "CRRT": "用量調整不要"
+    },
+    notes: "MRSA・VRE。血小板減少（>2週）、乳酸アシドーシス、視神経炎、セロトニン症候群。",
+  },
+
+  // ── リンコサミド ──
+  {
+    name: "クリンダマイシン (CLDM)",
+    aliases: "clindamycin, ダラシン",
+    cls: "リンコサミド",
+    normal: "600-900 mg IV q8h or 300-450 mg PO q6-8h",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要",
+      "HD": "用量調整不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "嫌気性菌・連鎖球菌毒素抑制（壊死性軟部組織感染）。CDI リスク高。",
+  },
+
+  // ── その他 ──
+  {
+    name: "ST合剤 (TMP/SMX)",
+    aliases: "sulfamethoxazole-trimethoprim, バクタ, バクトラミン",
+    cls: "葉酸代謝拮抗",
+    normal: "PCP 治療 15-20 mg TMP/kg/日 分3-4、感染症 2錠 q12h",
+    renal: {
+      ">50": "通常",
+      "30-50": "通常 or 50%",
+      "15-29": "50% に減量",
+      "<15": "推奨せず、必要時 25-50%",
+      "HD": "50% を HD後",
+      "CRRT": "50%"
+    },
+    notes: "高 K・Cr 偽上昇・骨髄抑制・SJS。PCP 治療 + 予防、L1 stenotrophomonas、Nocardia。",
+  },
+  {
+    name: "メトロニダゾール (MNZ)",
+    aliases: "metronidazole, フラジール, アネメトロ",
+    cls: "ニトロイミダゾール",
+    normal: "500 mg PO/IV q8h（CDI 経口 500 mg q8h or 125 mg q6h）",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要 or 50%",
+      "HD": "用量調整不要、HD後",
+      "CRRT": "用量調整不要"
+    },
+    notes: "嫌気性菌・原虫（赤痢アメーバ等）。アルコール禁忌（ジスルフィラム様）。CDI は VCM 経口優先。",
+  },
+  {
+    name: "コリスチン (CL)",
+    aliases: "colistin, polymyxin E, CMS",
+    cls: "ポリミキシン",
+    normal: "loading 9 MIU → 維持 4.5 MIU IV q12h",
+    renal: {
+      ">50": "9 MIU/日",
+      "30-50": "5.5-7.5 MIU/日",
+      "15-29": "4.5 MIU/日",
+      "<15": "3.5 MIU/日",
+      "HD": "loading + 1.5 MIU q12h、HD日は HD後追加",
+      "CRRT": "loading + 4-4.5 MIU q12h"
+    },
+    notes: "CRE/MDR Acinetobacter。腎毒性・神経毒性。loading dose 重要。",
+  },
+
+  // ── 抗真菌薬 ──
+  {
+    name: "フルコナゾール (FLCZ)",
+    aliases: "fluconazole, ジフルカン",
+    cls: "アゾール系抗真菌薬",
+    normal: "loading 800 mg → 維持 400 mg PO/IV q24h（侵襲性カンジダ）",
+    renal: {
+      ">50": "通常",
+      "30-50": "50% に減量",
+      "15-29": "50% に減量",
+      "<15": "50% に減量",
+      "HD": "通常用量を HD後",
+      "CRRT": "用量調整不要 or 通常量"
+    },
+    notes: "C. krusei 自然耐性、C. glabrata 耐性増。CYP 阻害（ワルファリン等）。",
+  },
+  {
+    name: "イトラコナゾール (ITCZ)",
+    aliases: "itraconazole, イトリゾール",
+    cls: "アゾール系抗真菌薬",
+    normal: "200 mg PO q12h × 2日 → q24h",
+    renal: {
+      ">50": "用量調整不要（経口）",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要（IV はシクロデキストリン蓄積で回避）",
+      "HD": "用量調整不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "TDM 推奨（trough 1-2 µg/mL）。心不全悪化注意、CYP3A4 阻害強。",
+  },
+  {
+    name: "ボリコナゾール (VRCZ)",
+    aliases: "voriconazole, ブイフェンド",
+    cls: "アゾール系抗真菌薬",
+    normal: "loading 6 mg/kg q12h × 2回 → 維持 4 mg/kg IV q12h or 200 mg PO q12h",
+    renal: {
+      ">50": "用量調整不要（IV/PO）",
+      "30-50": "PO 可、IV はシクロデキストリン蓄積懸念で慎重",
+      "15-29": "PO 推奨",
+      "<15": "PO 推奨",
+      "HD": "PO 用量調整不要",
+      "CRRT": "PO 推奨、IV 可能ならば TDM"
+    },
+    notes: "侵襲性アスペルギルス第一選択。TDM 必須（trough 1-5 µg/mL）。視覚異常、肝障害、皮膚毒性。",
+  },
+  {
+    name: "ポサコナゾール (PSCZ)",
+    aliases: "posaconazole, ノクサフィル",
+    cls: "アゾール系抗真菌薬",
+    normal: "錠剤 300 mg q12h × 2回 → q24h、注 300 mg q24h",
+    renal: {
+      ">50": "用量調整不要（経口錠）",
+      "30-50": "経口錠 用量調整不要",
+      "15-29": "経口錠 用量調整不要",
+      "<15": "経口錠 用量調整不要（IV はシクロデキストリン蓄積回避）",
+      "HD": "経口錠 用量調整不要",
+      "CRRT": "経口錠 用量調整不要"
+    },
+    notes: "ムーコル症・難治アスペルギルス。TDM 推奨（trough >1 µg/mL）。錠剤は経口液より吸収安定。",
+  },
+  {
+    name: "ミカファンギン (MCFG)",
+    aliases: "micafungin, ファンガード",
+    cls: "キャンディン",
+    normal: "100-150 mg IV q24h（食道カンジダ 150 mg）",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要",
+      "HD": "用量調整不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "侵襲性カンジダ第一選択。CNS・尿路移行不良。",
+  },
+  {
+    name: "カスポファンギン (CPFG)",
+    aliases: "caspofungin, カンサイダス",
+    cls: "キャンディン",
+    normal: "loading 70 mg → 50 mg IV q24h（体重 >80 kg は 70 mg 維持）",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要",
+      "HD": "用量調整不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "中等度肝障害で減量（35 mg）。",
+  },
+  {
+    name: "リポソーマルアムホテリシン B (L-AMB)",
+    aliases: "liposomal amphotericin B, アムビゾーム",
+    cls: "ポリエン",
+    normal: "3-5 mg/kg IV q24h（ムーコル症 5-10 mg/kg）",
+    renal: {
+      ">50": "用量調整不要",
+      "30-50": "用量調整不要",
+      "15-29": "用量調整不要",
+      "<15": "用量調整不要（腎毒性モニタリング）",
+      "HD": "用量調整不要",
+      "CRRT": "用量調整不要"
+    },
+    notes: "腎毒性（従来 AMB より軽減）・低 K/低 Mg・infusion reaction。生食でフラッシュ。",
+  },
+
+  // ── 抗ウイルス薬 ──
+  {
+    name: "アシクロビル (ACV)",
+    aliases: "acyclovir, ゾビラックス",
+    cls: "抗ヘルペス薬",
+    normal: "HSV 脳炎: 10 mg/kg IV q8h、VZV: 10-15 mg/kg q8h",
+    renal: {
+      ">50": "q8h",
+      "30-50": "q12h",
+      "15-29": "q24h",
+      "<15": "50% q24h",
+      "HD": "2.5-5 mg/kg q24h、HD後",
+      "CRRT": "5-10 mg/kg q24h"
+    },
+    notes: "理想体重で算定。十分な補液で結晶尿予防。神経毒性（高齢・腎不全）。",
+  },
+  {
+    name: "バラシクロビル (VACV)",
+    aliases: "valacyclovir, バルトレックス",
+    cls: "抗ヘルペス薬",
+    normal: "VZV 1 g PO q8h、HSV 性器 1 g q12h × 7-10日",
+    renal: {
+      ">50": "通常",
+      "30-50": "1 g q12h",
+      "15-29": "1 g q24h",
+      "<15": "500 mg q24h",
+      "HD": "500 mg q24h、HD後",
+      "CRRT": "1 g q12-24h"
+    },
+    notes: "経口吸収後 ACV に変換。TMA/HUS 報告（高用量・免疫不全）。",
+  },
+  {
+    name: "ガンシクロビル (GCV)",
+    aliases: "ganciclovir",
+    cls: "抗 CMV 薬",
+    normal: "誘導 5 mg/kg IV q12h、維持 5 mg/kg q24h",
+    renal: {
+      ">50": "誘導 q12h / 維持 q24h",
+      "30-50": "誘導 2.5 mg/kg q12h",
+      "15-29": "誘導 2.5 mg/kg q24h",
+      "<15": "1.25 mg/kg q24h",
+      "HD": "1.25 mg/kg HD後 × 3/週",
+      "CRRT": "2.5 mg/kg q24h"
+    },
+    notes: "骨髄抑制（好中球・血小板減少）。CMV 感染症・予防。催奇形性。",
+  },
+  {
+    name: "バルガンシクロビル (VGCV)",
+    aliases: "valganciclovir, バリキサ",
+    cls: "抗 CMV 薬",
+    normal: "誘導 900 mg PO q12h、維持・予防 900 mg q24h",
+    renal: {
+      ">50": "通常",
+      "30-50": "誘導 450 mg q12h",
+      "15-29": "誘導 450 mg q24h",
+      "<15": "推奨なし（GCV IV を推奨）",
+      "HD": "推奨なし（GCV IV）",
+      "CRRT": "GCV IV を推奨"
+    },
+    notes: "移植後 CMV 予防の主軸。",
+  },
+  {
+    name: "オセルタミビル (OST)",
+    aliases: "oseltamivir, タミフル",
+    cls: "ノイラミニダーゼ阻害薬",
+    normal: "75 mg PO q12h × 5日（治療）、q24h（予防）",
+    renal: {
+      ">50": "75 mg q12h",
+      "30-50": "30-60 mg q12h",
+      "15-29": "30 mg q12h or 30-75 mg q24h",
+      "<15": "30 mg q24h",
+      "HD": "30 mg HD後 × 各回",
+      "CRRT": "30-75 mg q24h（強度依存）"
+    },
+    notes: "重症・入院例は最大10日。発症48時間以内開始が原則。",
+  },
+];
+
+// ======================================================================
+// 疾患別 経験的レジメン（Sanford Guide ベース）
+// ======================================================================
+const diseases = [
+  // ── 中枢神経 ──
+  {
+    name: "細菌性髄膜炎（市中、成人）",
+    cat: "中枢神経",
+    empiric: [
+      "CTRX 2 g IV q12h + VCM（loading 25-30 mg/kg、AUC 400-600）",
+      "Listeria リスク（>50 歳、免疫低下、妊婦）: 上記 + ABPC 2 g IV q4h",
+      "デキサメタゾン 0.15 mg/kg q6h × 4日（抗菌薬前 or 同時）",
+    ],
+    notes: "鎮静抑制・神経症状あれば速やかに（door-to-antibiotic ≤1h）。CT 不要例では LP 先行可。",
+  },
+  {
+    name: "脳膿瘍",
+    cat: "中枢神経",
+    empiric: [
+      "CTX or CTRX 2 g IV q4-6h（高用量）+ MNZ 500 mg IV q8h",
+      "術後・外傷後: 上記 + VCM（MRSA カバー）",
+    ],
+    notes: "原則ドレナージ + 抗菌薬。6-8週投与が一般的。",
+  },
+  {
+    name: "HSV 脳炎",
+    cat: "中枢神経",
+    empiric: [
+      "アシクロビル 10 mg/kg IV q8h × 14-21日",
+    ],
+    notes: "PCR 陰性でも臨床疑いで開始。理想体重ベース。",
+  },
+
+  // ── 呼吸器 ──
+  {
+    name: "市中肺炎（外来、合併症なし）",
+    cat: "呼吸器",
+    empiric: [
+      "AMPC 1 g PO q8h ± マクロライド（AZM 500 mg → 250 mg×4日）",
+      "DOXY 100 mg PO q12h（非定型カバー）",
+    ],
+    notes: "肺炎球菌耐性懸念で高用量 AMPC。マクロライド単剤は耐性増で推奨しづらい。",
+  },
+  {
+    name: "市中肺炎（入院、非ICU）",
+    cat: "呼吸器",
+    empiric: [
+      "CTRX 1-2 g IV q24h + AZM 500 mg IV/PO q24h",
+      "β-ラクタムアレルギー: LVFX 750 mg PO/IV q24h",
+    ],
+    notes: "ウイルス検出陽性でも併存疾患があれば抗菌薬を残す選択あり（IDSA vs ATS で見解差、Klompas 2026 参照）。Day 3 で reassess、安定例は5日完了。",
+  },
+  {
+    name: "市中肺炎（ICU）",
+    cat: "呼吸器",
+    empiric: [
+      "CTRX 2 g IV q24h + AZM 500 mg IV q24h",
+      "MRSA リスク: + VCM or LZD",
+      "緑膿菌リスク（構造的肺疾患、CL 免疫不全）: 抗緑膿菌 β-ラクタム（PIPC/TAZ, CFPM, MEPM）+ AZM",
+    ],
+    notes: "重症 CAP は β-ラクタム + マクロライド併用にアウトカム改善示唆。",
+  },
+  {
+    name: "院内肺炎/人工呼吸器関連肺炎 (HAP/VAP)",
+    cat: "呼吸器",
+    empiric: [
+      "PIPC/TAZ 4.5 g IV q6h（or MEPM 1 g q8h, CFPM 2 g q8h）",
+      "MRSA リスク（最近抗菌薬曝露・MRSA 既往・高有病率施設）: + VCM or LZD",
+      "MDR 緑膿菌リスク（最近抗菌薬曝露 90日以内・人工呼吸 5日超）: 上記 + AMK or CPFX（2剤併用は耐性懸念時のみ）",
+    ],
+    notes: "7日完了が標準（非緑膿菌・臨床改善例）。培養 de-escalation を Day 2-3 で実施。",
+  },
+  {
+    name: "COPD 急性増悪（抗菌薬適応）",
+    cat: "呼吸器",
+    empiric: [
+      "AMPC/CVA 875/125 mg PO q12h or AZM 500 mg → 250 mg×4日",
+      "緑膿菌リスク: LVFX 750 mg PO q24h",
+    ],
+    notes: "膿性痰増加 + 呼吸困難 + 痰量増加（3徴） or 人工呼吸要時に抗菌薬。",
+  },
+
+  // ── 尿路 ──
+  {
+    name: "単純性下部尿路感染症（女性）",
+    cat: "尿路",
+    empiric: [
+      "ニトロフラントイン 100 mg PO q6-8h × 5日（CrCl ≥30）【第一選択】",
+      "ST 合剤 1錠 PO q12h × 3日（地域耐性 <20% なら）",
+      "ピブメシリナム（国内未承認）400 mg PO q8h × 3-5日",
+      "AMPC/CVA は耐性増で第一選択非推奨",
+    ],
+    notes: "SCOUT 試験（Lancet 2026）でニトロフラントイン > 単回フォスホマイシン。国内ではフォスホマイシン剤型差注意。",
+  },
+  {
+    name: "腎盂腎炎（外来・軽症）",
+    cat: "尿路",
+    empiric: [
+      "LVFX 750 mg PO q24h × 5-7日",
+      "ST 合剤 1錠 PO q12h × 7-14日（感受性確認後）",
+      "経口β-ラクタムは一般に劣る（10-14日要）",
+    ],
+    notes: "嘔吐・敗血症徴候・妊娠は入院。",
+  },
+  {
+    name: "腎盂腎炎/複雑性尿路感染症（入院）",
+    cat: "尿路",
+    empiric: [
+      "CTRX 1-2 g IV q24h",
+      "敗血症性ショック・ESBL リスク: MEPM 1 g IV q8h",
+      "緑膿菌・MDR リスク: PIPC/TAZ 4.5 g IV q6-8h",
+    ],
+    notes: "解熱・改善で経口スイッチ、計7日（非合併症）。",
+  },
+
+  // ── 腹腔内 ──
+  {
+    name: "市中腹腔内感染症（軽-中等症）",
+    cat: "腹腔内",
+    empiric: [
+      "ABPC/SBT 3 g IV q6h or CMZ 1-2 g IV q6-8h",
+      "CTRX 2 g IV q24h + MNZ 500 mg IV q8h",
+    ],
+    notes: "ソースコントロール優先、達成後 4日完了（STOP-IT 試験）。",
+  },
+  {
+    name: "市中腹腔内感染症（重症・院内発症）",
+    cat: "腹腔内",
+    empiric: [
+      "PIPC/TAZ 4.5 g IV q6h or MEPM 1 g IV q8h",
+      "腸球菌カバー必要時: + ABPC or VCM",
+      "Candida カバー（再手術後・免疫抑制）: + MCFG 100 mg q24h",
+    ],
+    notes: "ソースコントロール必須。培養 de-escalation。",
+  },
+  {
+    name: "胆管炎・胆嚢炎（中等症-重症）",
+    cat: "腹腔内",
+    empiric: [
+      "CTRX 1-2 g IV q24h + MNZ 500 mg IV q8h",
+      "ABPC/SBT 3 g IV q6h",
+      "重症: PIPC/TAZ 4.5 g IV q6h",
+    ],
+    notes: "ドレナージ達成後 4-7日。",
+  },
+  {
+    name: "Clostridioides difficile 感染症 (CDI)",
+    cat: "腹腔内",
+    empiric: [
+      "初発: フィダキソマイシン 200 mg PO q12h × 10日（第一選択）",
+      "代替: VCM 125 mg PO q6h × 10日",
+      "重症: VCM 500 mg PO q6h ± MNZ 500 mg IV q8h",
+      "再発: フィダキソマイシン extended-pulse, VCM tapered, ベズロトクスマブ併用",
+    ],
+    notes: "経口 VCM 全身吸収なく腎機能調整不要。MNZ 経口は劣後。",
+  },
+
+  // ── 皮膚軟部組織 ──
+  {
+    name: "蜂窩織炎（非膿瘍）",
+    cat: "皮膚軟部",
+    empiric: [
+      "CEZ 1-2 g IV q8h or セファレキシン 500 mg PO q6h",
+      "ペニシリンアレルギー: CLDM 300-450 mg PO q6-8h",
+      "MRSA リスク低: 連鎖球菌・MSSA カバーで十分",
+    ],
+    notes: "5日で十分（非合併症）。下肢挙上・原疾患（白癬等）治療。",
+  },
+  {
+    name: "皮膚膿瘍/化膿性蜂窩織炎（MRSA 想定）",
+    cat: "皮膚軟部",
+    empiric: [
+      "切開排膿 + ST 合剤 1-2錠 PO q12h × 7日",
+      "DOXY 100 mg PO q12h × 7日",
+      "重症: VCM IV",
+    ],
+    notes: "小膿瘍は切開排膿のみで可。",
+  },
+  {
+    name: "壊死性軟部組織感染症",
+    cat: "皮膚軟部",
+    empiric: [
+      "PIPC/TAZ 4.5 g IV q6h + VCM + CLDM 900 mg IV q8h（毒素抑制）",
+      "MEPM 1 g IV q8h + VCM + CLDM",
+    ],
+    notes: "緊急外科デブリードマン必須。CLDM は毒素産生抑制目的で併用。",
+  },
+  {
+    name: "糖尿病性足感染症（中等-重症）",
+    cat: "皮膚軟部",
+    empiric: [
+      "ABPC/SBT 3 g IV q6h（軽-中等症、緑膿菌リスクなし）",
+      "PIPC/TAZ 4.5 g IV q6h（重症 or 緑膿菌リスク）",
+      "MRSA リスク: + VCM or LZD",
+    ],
+    notes: "骨髄炎の有無で期間決定（軟部のみ 1-2週、骨炎 4-6週）。",
+  },
+
+  // ── 菌血症・心内膜炎 ──
+  {
+    name: "敗血症（経験的）",
+    cat: "菌血症",
+    empiric: [
+      "市中・腹腔内: PIPC/TAZ 4.5 g IV q6h or CTRX + MNZ",
+      "院内・MDR リスク: MEPM 1 g IV q8h + VCM",
+      "好中球減少性発熱: CFPM 2 g IV q8h or PIPC/TAZ 4.5 g IV q6h",
+    ],
+    notes: "1時間以内投与目標。培養後 de-escalation。",
+  },
+  {
+    name: "S. aureus 菌血症（MSSA）",
+    cat: "菌血症",
+    empiric: [
+      "CEZ 2 g IV q8h（第一選択）",
+      "ペニシリンアレルギー（非IgE）: CTRX 2 g IV q24h（劣後）",
+    ],
+    notes: "感染症内科コンサルト推奨。心エコー実施、追加培養で陰性化確認、最低2週（非合併性）。",
+  },
+  {
+    name: "S. aureus 菌血症（MRSA）",
+    cat: "菌血症",
+    empiric: [
+      "VCM（AUC 400-600 目標）or DAP 8-10 mg/kg IV q24h",
+    ],
+    notes: "VCM MIC ≥1.5 や治療反応不良なら DAP に切替検討。最低2週。",
+  },
+  {
+    name: "感染性心内膜炎（経験的）",
+    cat: "菌血症",
+    empiric: [
+      "自己弁: ABPC/SBT 3 g IV q6h + GM 1 mg/kg IV q8h",
+      "MRSA リスク高/IVDU: VCM + GM",
+      "人工弁（術後 1年以内）: VCM + GM + RFP 300 mg PO q8h",
+    ],
+    notes: "Duke 基準、血液培養 3 セット必須。感染症内科・心臓外科連携。",
+  },
+
+  // ── 骨関節 ──
+  {
+    name: "骨髄炎（成人、血行性/接触性）",
+    cat: "骨関節",
+    empiric: [
+      "培養待ち: VCM + CTRX or CFPM（広域カバー）",
+      "MSSA: CEZ 2 g IV q8h（4-6週）",
+      "MRSA: VCM or DAP",
+    ],
+    notes: "可能な限り培養確定後の標的治療。経口スイッチは PK/PD 確保（高用量 LVFX + RFP 等）。",
+  },
+  {
+    name: "化膿性関節炎",
+    cat: "骨関節",
+    empiric: [
+      "成人: VCM + CTRX（淋菌カバー含む若年・性活動期）",
+      "高齢・院内: VCM + 抗緑膿菌（PIPC/TAZ）",
+    ],
+    notes: "関節洗浄・ドレナージ必須。",
+  },
+  {
+    name: "脊椎インプラント感染症（早期、術後 ≤90日）",
+    cat: "骨関節",
+    empiric: [
+      "デブリードマン + インプラント温存 (DAIR) → 培養標的治療",
+      "経験的: VCM + 抗緑膿菌 β-ラクタム",
+    ],
+    notes: "Tai 2026 で 12週超の長期投与は失敗を減らさず → DAIR 成功例で 12週前後中止検討。",
+  },
+
+  // ── 真菌・ウイルス ──
+  {
+    name: "侵襲性カンジダ症/カンジダ血症",
+    cat: "真菌",
+    empiric: [
+      "MCFG 100 mg IV q24h（第一選択）or CPFG 70 → 50 mg q24h",
+      "感受性確認後 FLCZ にスイッチ可（C. albicans, C. parapsilosis）",
+    ],
+    notes: "中心静脈カテーテル抜去、眼科診察、培養陰性化 +14日。",
+  },
+  {
+    name: "侵襲性アスペルギルス症",
+    cat: "真菌",
+    empiric: [
+      "VRCZ 6 mg/kg IV q12h × 2 → 4 mg/kg q12h（第一選択）",
+      "代替: イサブコナゾール、L-AMB 3-5 mg/kg q24h",
+    ],
+    notes: "VRCZ TDM 必須（trough 1-5 µg/mL）。",
+  },
+  {
+    name: "ニューモシスチス肺炎 (PCP)",
+    cat: "真菌",
+    empiric: [
+      "ST 合剤 15-20 mg TMP/kg/日 分3-4 × 21日",
+      "中-重症（PaO2 <70 mmHg or A-a >35）: + プレドニゾロン 40 mg q12h × 5日 → 漸減",
+    ],
+    notes: "ST 不耐: ペンタミジン IV、プリマキン + CLDM、アトバコン。",
+  },
+  {
+    name: "VZV（帯状疱疹）",
+    cat: "ウイルス",
+    empiric: [
+      "免疫正常: バラシクロビル 1 g PO q8h × 7日",
+      "免疫抑制 or 播種性: アシクロビル 10-15 mg/kg IV q8h",
+    ],
+    notes: "発症 72時間以内開始。眼部三叉神経枝は眼科連携。",
+  },
+  {
+    name: "インフルエンザ（治療）",
+    cat: "ウイルス",
+    empiric: [
+      "オセルタミビル 75 mg PO q12h × 5日（重症は 10日）",
+      "重症・経口不可: ペラミビル 600 mg IV 単回",
+    ],
+    notes: "発症 48時間以内が原則だが、入院・重症・免疫抑制では時期問わず開始考慮。",
+  },
+];
+
+// ======================================================================
+// レンダリング
+// ======================================================================
+const renalCols = [">50", "30-50", "15-29", "<15", "HD", "CRRT"];
+
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else e.setAttribute(k, v);
+  }
+  for (const c of children) {
+    if (c == null) continue;
+    e.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  }
+  return e;
+}
+
+function renderDrugCard(d) {
+  const card = el("div", { class: "card" });
+  const h = el("h3", {});
+  h.append(d.name);
+  h.append(el("span", { class: "badge cls" }, d.cls));
+  card.append(h);
+  if (d.aliases) card.append(el("div", { class: "alias" }, "別名/略号: " + d.aliases));
+
+  const tbl = el("table", { class: "dose" });
+  const thead = el("thead");
+  const trh = el("tr");
+  trh.append(el("th", {}, "通常用量"));
+  for (const c of renalCols) trh.append(el("th", {}, "CrCl " + c));
+  thead.append(trh);
+  tbl.append(thead);
+
+  const tbody = el("tbody");
+  const tr = el("tr");
+  tr.append(el("td", { class: "normal" }, d.normal));
+  for (const c of renalCols) tr.append(el("td", {}, d.renal[c] || "—"));
+  tbody.append(tr);
+  tbl.append(tbody);
+  card.append(tbl);
+
+  if (d.notes) card.append(el("div", { class: "notes" }, d.notes));
+  card.append(el("div", { class: "source" }, "出典: Sanford Guide to Antimicrobial Therapy（参考）"));
+  return card;
+}
+
+function renderDiseaseCard(dz) {
+  const card = el("div", { class: "card" });
+  const h = el("h3", {});
+  h.append(dz.name);
+  h.append(el("span", { class: "badge" }, dz.cat));
+  card.append(h);
+  const ul = el("ul", { class: "empiric-list" });
+  for (const r of dz.empiric) ul.append(el("li", {}, r));
+  card.append(ul);
+  if (dz.notes) card.append(el("div", { class: "notes" }, dz.notes));
+  card.append(el("div", { class: "source" }, "出典: Sanford Guide to Antimicrobial Therapy（参考）"));
+  return card;
+}
+
+function normalize(s) {
+  return (s || "").toString().toLowerCase();
+}
+
+function applyDrugFilter() {
+  const q = normalize(document.getElementById("drug-search").value);
+  const cls = document.getElementById("drug-class").value;
+  const list = document.getElementById("drug-list");
+  list.innerHTML = "";
+  let n = 0;
+  for (const d of drugs) {
+    if (cls && d.cls !== cls) continue;
+    const hay = normalize(d.name + " " + d.aliases + " " + d.cls);
+    if (q && !hay.includes(q)) continue;
+    list.append(renderDrugCard(d));
+    n++;
+  }
+  document.getElementById("drug-count").textContent = n + " 薬剤";
+}
+
+function applyDiseaseFilter() {
+  const q = normalize(document.getElementById("disease-search").value);
+  const cat = document.getElementById("disease-cat").value;
+  const list = document.getElementById("disease-list");
+  list.innerHTML = "";
+  let n = 0;
+  for (const d of diseases) {
+    if (cat && d.cat !== cat) continue;
+    const hay = normalize(d.name + " " + d.cat + " " + d.empiric.join(" ") + " " + (d.notes || ""));
+    if (q && !hay.includes(q)) continue;
+    list.append(renderDiseaseCard(d));
+    n++;
+  }
+  document.getElementById("disease-count").textContent = n + " 疾患";
+}
+
+function initFilters() {
+  const clsSel = document.getElementById("drug-class");
+  const classes = [...new Set(drugs.map(d => d.cls))].sort();
+  for (const c of classes) clsSel.append(el("option", { value: c }, c));
+
+  const catSel = document.getElementById("disease-cat");
+  const cats = [...new Set(diseases.map(d => d.cat))];
+  for (const c of cats) catSel.append(el("option", { value: c }, c));
+
+  document.getElementById("drug-search").addEventListener("input", applyDrugFilter);
+  document.getElementById("drug-class").addEventListener("change", applyDrugFilter);
+  document.getElementById("disease-search").addEventListener("input", applyDiseaseFilter);
+  document.getElementById("disease-cat").addEventListener("change", applyDiseaseFilter);
+
+  for (const t of document.querySelectorAll(".tab")) {
+    t.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+      t.classList.add("active");
+      const tab = t.dataset.tab;
+      document.getElementById("tab-drug").classList.toggle("hidden", tab !== "drug");
+      document.getElementById("tab-disease").classList.toggle("hidden", tab !== "disease");
+    });
+  }
+}
+
+initFilters();
+applyDrugFilter();
+applyDiseaseFilter();
+</script>
+</body>
+</html>
