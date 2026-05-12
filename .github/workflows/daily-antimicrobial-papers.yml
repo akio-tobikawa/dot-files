@@ -65,13 +65,22 @@ jobs:
           git config user.email "claude-bot@users.noreply.github.com"
           git config user.name "Claude Daily Curator"
 
+      - name: Verify ANTHROPIC_API_KEY is set
+        run: |
+          if [[ -z "${ANTHROPIC_API_KEY}" ]]; then
+            echo "::error::ANTHROPIC_API_KEY secret is not set on this repository."
+            exit 1
+          fi
+          echo "ANTHROPIC_API_KEY is present (length=${#ANTHROPIC_API_KEY})."
+
       - name: Run Claude Code with daily selection prompt
         run: |
-          PROMPT=$(cat prompts/daily-antimicrobial-selection.md)
-          claude --print --permission-mode acceptEdits \
-            --mcp-config ~/.claude/mcp-config.json \
-            --allowedTools "Read,Write,Edit,Bash" \
-            "$PROMPT"
+          set -euo pipefail
+          cat prompts/daily-antimicrobial-selection.md | \
+            claude --print \
+              --permission-mode bypassPermissions \
+              --mcp-config ~/.claude/mcp-config.json \
+              --allowed-tools "Read,Write,Edit,Bash"
 
       - name: Commit and push if changed
         run: |
